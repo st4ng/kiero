@@ -470,12 +470,23 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 					return Status::UnknownError;
 				}
 
-				g_methodsTable = (uint150_t*)::calloc(150, sizeof(uint150_t));
+				IDXGIOutput* output = nullptr;
+				if (adapter->EnumOutputs(0, &output) < 0)
+				{
+					::DestroyWindow(window);
+					::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+					return Status::UnknownError;
+				}
+
+				g_methodsTable = (uint150_t*)::calloc(191, sizeof(uint150_t));
 				::memcpy(g_methodsTable, *(uint150_t**)device, 44 * sizeof(uint150_t));
 				::memcpy(g_methodsTable + 44, *(uint150_t**)commandQueue, 19 * sizeof(uint150_t));
 				::memcpy(g_methodsTable + 44 + 19, *(uint150_t**)commandAllocator, 9 * sizeof(uint150_t));
 				::memcpy(g_methodsTable + 44 + 19 + 9, *(uint150_t**)commandList, 60 * sizeof(uint150_t));
 				::memcpy(g_methodsTable + 44 + 19 + 9 + 60, *(uint150_t**)swapChain, 18 * sizeof(uint150_t));
+				::memcpy(g_methodsTable + 44 + 19 + 9 + 60 + 18, *(uint150_t**)adapter, 10 * sizeof(uint150_t));
+				::memcpy(g_methodsTable + 44 + 19 + 9 + 60 + 18 + 10, *(uint150_t**)output, 19 * sizeof(uint150_t));
+				::memcpy(g_methodsTable + 44 + 19 + 9 + 60 + 18 + 10 + 19, *(uint150_t**)factory, 12 * sizeof(uint150_t));
 
 #if KIERO_USE_MINHOOK
 				MH_Initialize();
@@ -495,6 +506,15 @@ kiero::Status::Enum kiero::init(RenderType::Enum _renderType)
 
 				swapChain->Release();
 				swapChain = NULL;
+
+				adapter->Release();
+				adapter = NULL;
+
+				output->Release();
+				output = NULL;
+
+				factory->Release();
+				factory = NULL;
 
 				::DestroyWindow(window);
 				::UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
